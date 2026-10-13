@@ -44,7 +44,11 @@ jobs:
         run: npm ci
 
       - name: Install Chrome and system dependencies
-        run: npx puppeteer browsers install chrome --install-deps
+        run: |
+          sudo env "PATH=$PATH" \
+            ./node_modules/.bin/puppeteer browsers install chrome \
+            --install-deps \
+            --path "$HOME/.cache/puppeteer"
 
       - name: Scrape historical prices
         env:
