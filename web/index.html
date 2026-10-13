@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Grafik dan riwayat harga emas Antam dari Logam Mulia.">
+  <meta name="theme-color" content="#f7f8fa">
+  <title>Riwayat Harga Emas Antam</title>
+  <link rel="icon" href="./assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="./assets/icons/favicon.ico" sizes="any">
+  <link rel="icon" href="./assets/icons/favicon-32x32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png" sizes="180x180">
+  <link rel="manifest" href="./site.webmanifest">
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">Logam Mulia · Antam</div>
+      <h1>Riwayat harga emas.</h1>
+      <p class="muted">Harga jual dan buyback per gram, berdasarkan data grafik Logam Mulia.</p>
+      <p id="status" role="status">Memuat data historis…</p>
+    </header>
+
+    <div id="content" hidden>
+      <section class="cards" aria-label="Harga terakhir">
+        <article class="card">
+          <div class="muted">Harga jual</div>
+          <div class="price" id="sell-price">—</div>
+          <div class="change" id="sell-change"></div>
+          <div class="muted change" id="sell-date"></div>
+        </article>
+
+        <article class="card">
+          <div class="muted">Buyback</div>
+          <div class="price" id="buyback-price">—</div>
+          <div class="change" id="buyback-change"></div>
+          <div class="muted change" id="buyback-date"></div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="toolbar">
+          <div>
+            <h2>Pergerakan harga</h2>
+            <p class="muted change" id="period"></p>
+          </div>
+
+          <div class="ranges" aria-label="Rentang grafik">
+            <button type="button" data-days="7" aria-pressed="false" title="Tampilkan 7 hari terakhir">7 Hari</button>
+            <button type="button" data-days="30" aria-pressed="false" title="Tampilkan 30 hari terakhir">30 Hari</button>
+            <button type="button" data-days="90" aria-pressed="false" title="Tampilkan 90 hari terakhir">90 Hari</button>
+            <button type="button" data-days="365" class="active" aria-pressed="true" title="Tampilkan 365 hari terakhir">365 Hari</button>
+            <button type="button" data-days="0" aria-pressed="false" title="Tampilkan semua data">Semua</button>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="chart" role="img" aria-label="Grafik harga jual dan buyback emas Antam"></canvas>
+        </div>
+
+        <div class="chart-legend" aria-label="Keterangan grafik">
+          <span><i class="legend-dot sell"></i>Harga jual</span>
+          <span><i class="legend-dot buyback"></i>Harga buyback</span>
+        </div>
+      </section>
+
+      <footer>
+        Data harga emas bersumber dari <a href="https://www.logammulia.com" target="_blank" rel="noopener noreferrer">Logam Mulia</a>
+        dan ditampilkan tanpa penyesuaian pajak.
+      </footer>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="./assets/js/script.js"></script>
+</body>
+</html>

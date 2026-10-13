@@ -1,0 +1,85 @@
+name: Scrape Gold History
+
+on:
+  workflow_dispatch:
+  schedule:
+    # UTC → WIB: 08.30 dan 08.45
+    - cron: '30,45 1 * * *'
+    # UTC → WIB: 09.00–10.45, setiap 15 menit
+    - cron: '*/15 2-3 * * *'
+    # UTC → WIB: 11.00
+    - cron: '0 4 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gold-history-scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: write
+
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chrome and system dependencies
+        run: npx puppeteer browsers install chrome --install-deps
+
+      - name: Scrape historical prices
+        env:
+          NO_SANDBOX: 'true'
+        run: npm run scrape
+
+      - name: Commit changed data
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git add -- web/data/gold-history.json
+
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Data tidak berubah."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git commit -m "chore(data): update Logam Mulia price history"
+          git push origin HEAD:main
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: scrape
+    if: needs.scrape.outputs.changed == 'true'
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    uses: ./.github/workflows/deploy.yml
