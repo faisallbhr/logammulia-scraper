@@ -172,6 +172,88 @@ button:focus-visible, a:focus-visible {
   background: var(--green);
 }
 
+.table-container {
+  overflow-x: auto;
+  margin-top: 20px;
+  max-height: 560px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+  text-align: right;
+}
+
+th, td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  text-align: right;
+}
+
+thead th:first-child, tbody th {
+  text-align: left;
+}
+
+.daily-change span {
+  display: block;
+  font-size: 12px;
+}
+
+.daily-change .up {
+  color: #008f5a;
+}
+
+.daily-change .down {
+  color: #d92d20;
+}
+
+.daily-change .unchanged {
+  color: var(--muted);
+}
+
+tbody tr:last-child th,
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.pagination-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+#page-info {
+  font-size: 12px;
+}
+
 footer {
   max-width: 640px;
   margin: 8px auto 0;

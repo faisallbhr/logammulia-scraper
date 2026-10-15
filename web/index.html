@@ -66,6 +66,38 @@
         </div>
       </section>
 
+      <section class="panel">
+        <div class="toolbar">
+          <div>
+            <h2>Riwayat harga</h2>
+            <p class="muted change">Harga terakhir yang tercatat setiap hari.</p>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <caption class="sr-only">Riwayat harga jual dan buyback emas Antam</caption>
+            <thead>
+              <tr>
+                <th scope="col">Tanggal</th>
+                <th scope="col">Harga jual</th>
+                <th scope="col">Buyback</th>
+                <th scope="col">Perubahan harian</th>
+              </tr>
+            </thead>
+            <tbody id="history-table"></tbody>
+          </table>
+        </div>
+
+        <nav class="pagination" aria-label="Navigasi riwayat harga">
+          <span id="page-info" class="muted" aria-live="polite"></span>
+          <div class="pagination-buttons">
+            <button type="button" id="previous-page">Sebelumnya</button>
+            <button type="button" id="next-page">Berikutnya</button>
+          </div>
+        </nav>
+      </section>
+
       <footer>
         Data harga emas bersumber dari <a href="https://www.logammulia.com" target="_blank" rel="noopener noreferrer">Logam Mulia</a>
         dan ditampilkan tanpa penyesuaian pajak.

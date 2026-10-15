@@ -26,6 +26,9 @@ const dayTimestamp = date => {
 };
 let data;
 let chart;
+let historyRows = [];
+let historyPage = 1;
+const historyPageSize = 25;
 
 function validateSeries(series, label) {
   if (!Array.isArray(series) || !series.length) {
@@ -76,6 +79,70 @@ function renderCard(key) {
   element.style.color = difference === 0
     ? '#687385'
     : difference > 0 ? '#008f5a' : '#d92d20';
+}
+
+function renderHistoryTable() {
+  const history = new Map();
+
+  for (const key of ['sell', 'buyback']) {
+    for (const [timestamp, price] of data[key]) {
+      const date = dayKey(timestamp);
+      const row = history.get(date) || { date };
+      row[key] = price;
+      history.set(date, row);
+    }
+  }
+
+  historyRows = [...history.values()]
+    .sort((a, b) => b.date.localeCompare(a.date))
+
+  let previous = {};
+  for (let index = historyRows.length - 1; index >= 0; index -= 1) {
+    const row = historyRows[index];
+    row.sellChange = row.sell === undefined || previous.sell === undefined
+      ? undefined
+      : row.sell - previous.sell;
+    row.buybackChange = row.buyback === undefined || previous.buyback === undefined
+      ? undefined
+      : row.buyback - previous.buyback;
+    previous = {
+      sell: row.sell ?? previous.sell,
+      buyback: row.buyback ?? previous.buyback,
+    };
+  }
+
+  renderHistoryPage();
+}
+
+function formatHistoryChange(label, difference) {
+  if (difference === undefined) return `<span>—</span>`;
+  if (difference === 0) return `<span class="unchanged">${label} → Tidak berubah</span>`;
+  const direction = difference > 0 ? 'up' : 'down';
+  const icon = difference > 0 ? '↑' : '↓';
+  return `<span class="${direction}">${label} ${icon} ${rupiah.format(Math.abs(difference))}</span>`;
+}
+
+function renderHistoryPage() {
+  const pageCount = Math.ceil(historyRows.length / historyPageSize);
+  const start = (historyPage - 1) * historyPageSize;
+
+  document.getElementById('history-table').innerHTML = historyRows
+    .slice(start, start + historyPageSize)
+    .map(row => `
+      <tr>
+        <th scope="row">${dateLabel(dayTimestamp(row.date))}</th>
+        <td>${row.sell ? rupiah.format(row.sell) : '—'}</td>
+        <td>${row.buyback ? rupiah.format(row.buyback) : '—'}</td>
+        <td class="daily-change">
+          ${formatHistoryChange('Jual', row.sellChange)}
+          ${formatHistoryChange('Buyback', row.buybackChange)}
+        </td>
+      </tr>`)
+    .join('');
+
+  document.getElementById('page-info').textContent = `Halaman ${historyPage} dari ${pageCount}`;
+  document.getElementById('previous-page').disabled = historyPage === 1;
+  document.getElementById('next-page').disabled = historyPage === pageCount;
 }
 
 function renderRange(days) {
@@ -194,6 +261,7 @@ async function init() {
 
     renderCard('sell');
     renderCard('buyback');
+    renderHistoryTable();
 
     document.getElementById('content').hidden = false;
     document.getElementById('status').hidden = true;
@@ -201,6 +269,15 @@ async function init() {
 
     document.querySelectorAll('[data-days]').forEach(button => {
       button.addEventListener('click', () => renderRange(Number(button.dataset.days)));
+    });
+
+    document.getElementById('previous-page').addEventListener('click', () => {
+      historyPage -= 1;
+      renderHistoryPage();
+    });
+    document.getElementById('next-page').addEventListener('click', () => {
+      historyPage += 1;
+      renderHistoryPage();
     });
 
   } catch (error) {
