@@ -1,6 +1,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
+const { sendTelegram } = require('./telegram');
 const puppeteer = require('puppeteer-extra');
 
 puppeteer.use(require('puppeteer-extra-plugin-stealth')());
@@ -16,8 +17,6 @@ const TABS = {
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-// Timestamp sumber diperlakukan sebagai waktu lokal yang dikodekan sebagai UTC.
-// Tidak menambahkan offset WIB.
 function normalize(points) {
   if (!Array.isArray(points) || !points.length) {
     throw new Error('Data grafik kosong');
@@ -38,20 +37,13 @@ function normalize(points) {
       throw new Error(`Data tidak valid: ${JSON.stringify([timestamp, value])}`);
     }
 
-    const date = new Date(timestamp);
+    const day = Math.floor(timestamp / DAY_MS);
 
-    // Pertahankan konvensi histori lama: tanggal pada 08:30 UTC.
-    const day = Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth(),
-      date.getUTCDate(),
-      8, 30
-    );
-
-    days.set(day, price);
+    // Deduplicate berdasarkan tanggal, pertahankan timestamp asli.
+    days.set(day, [timestamp, price]);
   }
 
-  return [...days].sort((a, b) => a[0] - b[0]);
+  return [...days.values()].sort((a, b) => a[0] - b[0]);
 }
 
 function merge(existing, fresh, label) {
@@ -379,6 +371,10 @@ async function main() {
   console.log(
     `${changed ? 'Diperbarui' : 'Tidak berubah'}: ${filename}`
   );
+
+  await sendTelegram(history);
+
+  console.log('[lm] Selesai');
 }
 
 if (require.main === module) {
