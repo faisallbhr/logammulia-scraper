@@ -62,9 +62,10 @@ function renderCard(key) {
   document.getElementById(`${key}-date`).textContent = `Data terakhir: ${dateLabel(latest[0])}`;
 
   const element = document.getElementById(`${key}-change`);
+  element.className = 'change';
 
   if (!previous) {
-    element.textContent = 'Belum ada data hari sebelumnya';
+    element.textContent = 'Belum ada data pembanding';
     return;
   }
 
@@ -72,13 +73,14 @@ function renderCard(key) {
   const percent = Math.abs(difference / previous[1] * 100)
     .toLocaleString('id-ID', { maximumFractionDigits: 2 });
 
-  element.textContent = difference === 0
-    ? 'Tidak berubah dari hari sebelumnya'
-    : `${difference > 0 ? '↑' : '↓'} ${rupiah.format(Math.abs(difference))} (${percent}%) dari hari sebelumnya`;
+  if (difference === 0) {
+    element.textContent = 'Tidak berubah dari data sebelumnya';
+    return;
+  }
 
-  element.style.color = difference === 0
-    ? '#687385'
-    : difference > 0 ? '#008f5a' : '#d92d20';
+  const rising = difference > 0;
+  element.classList.add(rising ? 'up' : 'down');
+  element.textContent = `${rising ? 'Naik' : 'Turun'} ${rupiah.format(Math.abs(difference))} (${rising ? '+' : '−'}${percent}%) dari data sebelumnya`;
 }
 
 function renderHistoryTable() {
@@ -94,7 +96,7 @@ function renderHistoryTable() {
   }
 
   historyRows = [...history.values()]
-    .sort((a, b) => b.date.localeCompare(a.date))
+    .sort((a, b) => b.date.localeCompare(a.date));
 
   let previous = {};
   for (let index = historyRows.length - 1; index >= 0; index -= 1) {
@@ -115,11 +117,11 @@ function renderHistoryTable() {
 }
 
 function formatHistoryChange(label, difference) {
-  if (difference === undefined) return `<span>—</span>`;
-  if (difference === 0) return `<span class="unchanged">${label} → Tidak berubah</span>`;
+  if (difference === undefined) return `<span class="unchanged">${label}: tidak tersedia</span>`;
+  if (difference === 0) return `<span class="unchanged">${label}: tidak berubah</span>`;
   const direction = difference > 0 ? 'up' : 'down';
-  const icon = difference > 0 ? '↑' : '↓';
-  return `<span class="${direction}">${label} ${icon} ${rupiah.format(Math.abs(difference))}</span>`;
+  const sign = difference > 0 ? '+' : '−';
+  return `<span class="${direction}">${label}: ${sign}${rupiah.format(Math.abs(difference))}</span>`;
 }
 
 function renderHistoryPage() {
@@ -131,8 +133,8 @@ function renderHistoryPage() {
     .map(row => `
       <tr>
         <th scope="row">${dateLabel(dayTimestamp(row.date))}</th>
-        <td>${row.sell ? rupiah.format(row.sell) : '—'}</td>
-        <td>${row.buyback ? rupiah.format(row.buyback) : '—'}</td>
+        <td>${row.sell ? rupiah.format(row.sell) : 'Tidak tersedia'}</td>
+        <td>${row.buyback ? rupiah.format(row.buyback) : 'Tidak tersedia'}</td>
         <td class="daily-change">
           ${formatHistoryChange('Jual', row.sellChange)}
           ${formatHistoryChange('Buyback', row.buybackChange)}
@@ -192,6 +194,11 @@ async function init() {
       buyback: validateSeries(raw.buyback, 'buyback'),
     };
 
+    const latestTimestamp = Math.max(data.sell.at(-1)[0], data.buyback.at(-1)[0]);
+    const latestDate = document.getElementById('latest-date');
+    latestDate.textContent = `Data terbaru tersedia: ${dateLabel(latestTimestamp)}`;
+    latestDate.hidden = false;
+
     if (typeof Chart === 'undefined') {
       throw new Error('Chart.js gagal dimuat. Periksa koneksi ke CDN.');
     }
@@ -203,14 +210,14 @@ async function init() {
           {
             label: 'Harga jual',
             data: [],
-            borderColor: '#a87915',
-            backgroundColor: '#a87915',
+            borderColor: '#94670d',
+            backgroundColor: '#94670d',
           },
           {
             label: 'Harga buyback',
             data: [],
-            borderColor: '#168777',
-            backgroundColor: '#168777',
+            borderColor: '#137d70',
+            backgroundColor: '#137d70',
           },
         ],
       },
@@ -241,7 +248,7 @@ async function init() {
             bounds: 'data',
             grid: { display: false },
             ticks: {
-              maxTicksLimit: 6,
+              maxTicksLimit: window.matchMedia('(max-width: 600px)').matches ? 4 : 6,
               callback: value => dateLabel(value),
             },
           },

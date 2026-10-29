@@ -15,39 +15,47 @@
 </head>
 
 <body>
-  <main>
-    <header>
+  <a class="skip-link" href="#main-content">Lewati ke konten utama</a>
+
+  <main id="main-content">
+    <header class="page-header">
       <div class="eyebrow">Logam Mulia · Antam</div>
       <h1>Riwayat harga emas.</h1>
-      <p class="muted">Harga jual dan buyback per gram, berdasarkan data grafik Logam Mulia.</p>
-      <p id="status" role="status">Memuat data historis…</p>
+      <p class="muted intro">Harga jual dan buyback per gram, berdasarkan data grafik Logam Mulia.</p>
+      <p id="latest-date" class="muted data-freshness" hidden></p>
+      <div id="status" role="status">
+        <span class="loading-indicator" aria-hidden="true"></span>
+        <span>Memuat data harga historis…</span>
+      </div>
     </header>
 
     <div id="content" hidden>
-      <section class="cards" aria-label="Harga terakhir">
+      <section class="cards" aria-labelledby="summary-title">
+        <h2 id="summary-title" class="sr-only">Harga terbaru</h2>
+
         <article class="card">
-          <div class="muted">Harga jual</div>
-          <div class="price" id="sell-price">—</div>
-          <div class="change" id="sell-change"></div>
-          <div class="muted change" id="sell-date"></div>
+          <p class="muted metric-label">Harga jual</p>
+          <p class="price" id="sell-price">Tidak tersedia</p>
+          <p class="change" id="sell-change"></p>
+          <p class="muted change" id="sell-date"></p>
         </article>
 
         <article class="card">
-          <div class="muted">Buyback</div>
-          <div class="price" id="buyback-price">—</div>
-          <div class="change" id="buyback-change"></div>
-          <div class="muted change" id="buyback-date"></div>
+          <p class="muted metric-label">Buyback</p>
+          <p class="price" id="buyback-price">Tidak tersedia</p>
+          <p class="change" id="buyback-change"></p>
+          <p class="muted change" id="buyback-date"></p>
         </article>
       </section>
 
-      <section class="panel">
+      <section class="panel" aria-labelledby="chart-title">
         <div class="toolbar">
           <div>
-            <h2>Pergerakan harga</h2>
+            <h2 id="chart-title">Pergerakan harga</h2>
             <p class="muted change" id="period"></p>
           </div>
 
-          <div class="ranges" aria-label="Rentang grafik">
+          <div class="ranges" role="group" aria-label="Pilih rentang grafik">
             <button type="button" data-days="7" aria-pressed="false" title="Tampilkan 7 hari terakhir">7 Hari</button>
             <button type="button" data-days="30" aria-pressed="false" title="Tampilkan 30 hari terakhir">30 Hari</button>
             <button type="button" data-days="90" aria-pressed="false" title="Tampilkan 90 hari terakhir">90 Hari</button>
@@ -57,24 +65,27 @@
         </div>
 
         <div class="chart-container">
-          <canvas id="chart" role="img" aria-label="Grafik harga jual dan buyback emas Antam"></canvas>
+          <canvas id="chart" role="img" aria-label="Grafik harga jual dan buyback emas Antam">
+            Grafik harga jual dan buyback emas Antam.
+          </canvas>
         </div>
 
         <div class="chart-legend" aria-label="Keterangan grafik">
-          <span><i class="legend-dot sell"></i>Harga jual</span>
-          <span><i class="legend-dot buyback"></i>Harga buyback</span>
+          <span><i class="legend-dot sell" aria-hidden="true"></i>Harga jual</span>
+          <span><i class="legend-dot buyback" aria-hidden="true"></i>Harga buyback</span>
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel" aria-labelledby="history-title">
         <div class="toolbar">
           <div>
-            <h2>Riwayat harga</h2>
+            <h2 id="history-title">Riwayat harga</h2>
             <p class="muted change">Harga terakhir yang tercatat setiap hari.</p>
           </div>
         </div>
 
-        <div class="table-container">
+        <p class="muted table-scroll-hint" id="table-scroll-hint">Geser tabel untuk melihat seluruh kolom.</p>
+        <div class="table-container" role="region" aria-labelledby="history-title" aria-describedby="table-scroll-hint" tabindex="0">
           <table>
             <caption class="sr-only">Riwayat harga jual dan buyback emas Antam</caption>
             <thead>
@@ -99,13 +110,13 @@
       </section>
 
       <footer>
-        Data harga emas bersumber dari <a href="https://www.logammulia.com" target="_blank" rel="noopener noreferrer">Logam Mulia</a>
-        dan ditampilkan tanpa penyesuaian pajak.
+        Data bersumber dari <a href="https://www.logammulia.com" target="_blank" rel="noopener noreferrer">situs resmi Logam Mulia</a>.
+        Dasbor ini bukan produk resmi Antam, bukan layanan harga real-time, dan harga ditampilkan tanpa penyesuaian pajak.
       </footer>
     </div>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="./assets/js/script.js"></script>
 </body>
 </html>
