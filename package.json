@@ -10,8 +10,7 @@
   "keywords": [],
   "type": "commonjs",
   "dependencies": {
-    "puppeteer": "^25.13.0",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "@lightpanda/browser": "^1.6.0",
+    "puppeteer-core": "^25.16.0"
   }
 }

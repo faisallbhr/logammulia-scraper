@@ -1,10 +1,9 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
+const { lightpanda } = require('@lightpanda/browser');
+const puppeteer = require('puppeteer-core');
 const { sendTelegram } = require('./telegram');
-const puppeteer = require('puppeteer-extra');
-
-puppeteer.use(require('puppeteer-extra-plugin-stealth')());
 
 const URL = 'https://logammulia.com/harga-emas';
 const RANGE = process.env.LM_RANGE || '1 Bulan';
@@ -235,18 +234,20 @@ async function select(page, selector, label, type) {
 }
 
 async function scrape() {
-  const browser = await puppeteer.launch({
-    headless: process.env.HEADLESS !== 'false',
-    ...(process.env.CHROME_PATH && {
-      executablePath: process.env.CHROME_PATH,
-    }),
-    ...(process.env.NO_SANDBOX === 'true' && {
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    }),
-  });
+  const lightpandaProcess = await lightpanda.serve();
+  let browser;
+  let context;
 
   try {
-    const page = await browser.newPage();
+    lightpandaProcess.stdout.pipe(process.stdout);
+    lightpandaProcess.stderr.pipe(process.stderr);
+
+    browser = await puppeteer.connect({
+      browserWSEndpoint: 'ws://127.0.0.1:9222',
+    });
+    context = await browser.createBrowserContext();
+
+    const page = await context.newPage();
 
     await page.setViewport({ width: 1366, height: 900 });
     await page.evaluateOnNewDocument(hookCharts);
@@ -280,7 +281,15 @@ async function scrape() {
 
     return result;
   } finally {
-    await browser.close();
+    await context?.close().catch(() => {});
+
+    try {
+      await browser?.disconnect();
+    } finally {
+      lightpandaProcess.stdout.destroy();
+      lightpandaProcess.stderr.destroy();
+      lightpandaProcess.kill();
+    }
   }
 }
 

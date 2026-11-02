@@ -39,16 +39,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Chrome and system dependencies
-        run: |
-          sudo env "PATH=$PATH" \
-            ./node_modules/.bin/puppeteer browsers install chrome \
-            --install-deps \
-            --path "$HOME/.cache/puppeteer"
+      - name: Cache Lightpanda
+        id: lightpanda-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/lightpanda-node
+          key: ${{ runner.os }}-lightpanda-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Lightpanda
+        if: steps.lightpanda-cache.outputs.cache-hit != 'true'
+        run: npx lightpanda install
 
       - name: Scrape historical prices
         env:
-          NO_SANDBOX: 'true'
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: npm run scrape
